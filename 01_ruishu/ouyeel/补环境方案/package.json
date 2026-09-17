@@ -1,0 +1,18 @@
+{
+  "name": "env",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./index.js",
+  "exports": "./index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "query:dry-run": "node src/mobile-client.js --dry-run"
+  },
+  "dependencies": {
+    "xhr2": "^0.2.1"
+  }
+}
