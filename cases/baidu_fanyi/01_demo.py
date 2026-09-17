@@ -1,4 +1,7 @@
-"""百度翻译接口(直接请求即可)"""
+"""
+百度翻译接口(直接请求即可)
+https://fanyi.baidu.com/
+"""
 
 import json
 import time

@@ -1,4 +1,7 @@
-"""游民星空新闻列表爬虫：通过 JSONP 接口获取列表数据。"""
+"""
+游民星空新闻列表爬虫：通过 JSONP 接口获取列表数据。
+https://www.gamersky.com/
+"""
 
 import requests
 import time
