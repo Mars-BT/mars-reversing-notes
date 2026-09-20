@@ -14,7 +14,7 @@ require(__dirname + '/dec.js')
 try {
     require_if_exists('boot.js')
 } catch (error) {
-    console.log('bootstrap error:', error.message)
+    console.log('bootstrap error:', error.stack || error.message)
 }
 
 window.dispatchEvent({type: 'load', target: window})

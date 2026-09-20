@@ -49,10 +49,53 @@ Object.defineProperty(window, 'navigator', {
         vendor: 'Google Inc.',
         vendorSub: '',
         webdriver: false,
-        plugins: [],
-        mimeTypes: []
+        connection: {
+            effectiveType: '4g',
+            rtt: 50,
+            downlink: 10,
+            saveData: false,
+            addEventListener() {},
+            removeEventListener() {}
+        },
+        plugins: [
+            {name: 'PDF Viewer', filename: 'internal-pdf-viewer', description: 'Portable Document Format'},
+            {name: 'Chrome PDF Viewer', filename: 'internal-pdf-viewer', description: 'Portable Document Format'},
+            {name: 'Chromium PDF Viewer', filename: 'internal-pdf-viewer', description: 'Portable Document Format'}
+        ],
+        mimeTypes: [
+            {type: 'application/pdf', suffixes: 'pdf', description: 'Portable Document Format'},
+            {type: 'text/pdf', suffixes: 'pdf', description: 'Portable Document Format'}
+        ],
+        getBattery() {
+            const battery = {charging: true, chargingTime: 0, dischargingTime: Infinity, level: 1}
+            return {
+                then(callback) {
+                    callback(battery)
+                    return {catch() {}}
+                }
+            }
+        },
+        webkitPersistentStorage: {
+            queryUsageAndQuota(callback) { if (callback) callback(0, 0) },
+            requestQuota(bytes, callback) { if (callback) callback(bytes) }
+        }
     }
 })
+window.chrome = {
+    app: {
+        isInstalled: false,
+        InstallState: {DISABLED: 'disabled', INSTALLED: 'installed', NOT_INSTALLED: 'not_installed'},
+        RunningState: {CANNOT_RUN: 'cannot_run', READY_TO_RUN: 'ready_to_run', RUNNING: 'running'}
+    },
+    runtime: {
+        OnInstalledReason: {CHROME_UPDATE: 'chrome_update', INSTALL: 'install', SHARED_MODULE_UPDATE: 'shared_module_update', UPDATE: 'update'},
+        OnRestartRequiredReason: {APP_UPDATE: 'app_update', OS_UPDATE: 'os_update', PERIODIC: 'periodic'},
+        PlatformArch: {ARM: 'arm', ARM64: 'arm64', MIPS: 'mips', MIPS64: 'mips64', X86_32: 'x86-32', X86_64: 'x86-64'},
+        PlatformNaclArch: {ARM: 'arm', MIPS: 'mips', MIPS64: 'mips64', X86_32: 'x86-32', X86_64: 'x86-64'},
+        PlatformOs: {ANDROID: 'android', CROS: 'cros', LINUX: 'linux', MAC: 'mac', OPENBSD: 'openbsd', WIN: 'win'},
+        RequestUpdateCheckStatus: {NO_UPDATE: 'no_update', THROTTLED: 'throttled', UPDATE_AVAILABLE: 'update_available'}
+    }
+}
 window.screen = {
     width: 1920,
     height: 1080,
@@ -69,6 +112,19 @@ window.innerHeight = 955
 window.outerWidth = 1920
 window.outerHeight = 1080
 window.top = window
+window.self = window
+window.parent = window
+window.clientInformation = window.navigator
+window.name = ''
+window.open = function () { return null }
+window.MutationObserver = function MutationObserver() { this.observe = function () {}; this.disconnect = function () {} }
+window.PointerEvent = function PointerEvent(type, init) { this.type = type; Object.assign(this, init || {}) }
+window.DOMParser = function DOMParser() {}
+window.DOMParser.prototype.parseFromString = function () { return {documentElement: create_dom_element('html')} }
+window.indexedDB = {
+    open() { return {onsuccess: null, onerror: null, onupgradeneeded: null} },
+    deleteDatabase() { return {} }
+}
 const event_listeners = new Map()
 window.addEventListener = function (type, callback) {
     console.log([type, callback])
@@ -83,7 +139,7 @@ window.dispatchEvent = function (event) {
         try {
             callback.call(window, event)
         } catch (error) {
-            console.log('event callback error:', error.message)
+            console.log('event callback error:', error.stack || error.message)
         }
     }
     return true
@@ -100,6 +156,21 @@ setTimeout = function () { }
 setInterval = function () { }
 window.claerInterval = function () { }
 window.attachEvent = function () { }
+
+function create_storage() {
+    const values = new Map()
+    return {
+        get length() { return values.size },
+        key(index) { return Array.from(values.keys())[index] || null },
+        getItem(key) { return values.has(String(key)) ? values.get(String(key)) : null },
+        setItem(key, value) { values.set(String(key), String(value)) },
+        removeItem(key) { values.delete(String(key)) },
+        clear() { values.clear() }
+    }
+}
+
+window.localStorage = create_storage()
+window.sessionStorage = create_storage()
 
 window.req_param = undefined
 
@@ -141,33 +212,97 @@ location = {
     "port": "",
     "pathname": "/steel/search",
     "search": "?channel=RJ&pageIndex=0&pageSize=50",
-    "hash": ""
-}
-navigator={userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0',
-           languages : ['zh-CN'],
-            platform: 'Win32',
- 
+    "hash": "",
+    toString() { return this.href },
+    assign(value) { this.href = new URL(value, this.href).href },
+    replace(value) { this.href = new URL(value, this.href).href },
+    reload() {}
 }
 
-div = {
-    getElementsByTagName: function (...args) {
-        console.log(args)
-        return []
-    }
-}
-form = {}
-input = {}
-n = {}
-head = { removeChild: function (ele) { } }
-script = {
-    getAttribute: function (ele) {
-        console.log('script getAttribute', ele)
-        if (ele === 'r') {
-            return 'm'
+function create_dom_element(tag_name) {
+    const attributes = new Map()
+    const children = []
+    const element = {
+        nodeType: 1,
+        tagName: String(tag_name).toUpperCase(),
+        nodeName: String(tag_name).toUpperCase(),
+        style: {},
+        children: children,
+        childNodes: children,
+        parentNode: null,
+        parentElement: null,
+        ownerDocument: null,
+        innerHTML: '',
+        innerText: '',
+        textContent: '',
+        appendChild(child) {
+            children.push(child)
+            child.parentNode = element
+            child.parentElement = element
+            return child
+        },
+        removeChild(child) {
+            const index = children.indexOf(child)
+            if (index !== -1) children.splice(index, 1)
+            // Keep the relationship readable in this lightweight DOM.  The
+            // challenge has two cleanup paths that can remove the same script
+            // during our synchronous load dispatch.
+            return child
+        },
+        insertBefore(child, reference) {
+            const index = children.indexOf(reference)
+            if (index === -1) return element.appendChild(child)
+            children.splice(index, 0, child)
+            child.parentNode = element
+            child.parentElement = element
+            return child
+        },
+        remove() {
+            if (element.parentNode) element.parentNode.removeChild(element)
+        },
+        setAttribute(name, value) {
+            attributes.set(String(name), String(value))
+            element[name] = String(value)
+        },
+        getAttribute(name) {
+            return attributes.has(String(name)) ? attributes.get(String(name)) : null
+        },
+        hasAttribute(name) { return attributes.has(String(name)) },
+        removeAttribute(name) {
+            attributes.delete(String(name))
+            delete element[name]
+        },
+        getElementsByTagName() { return [] },
+        querySelector() { return null },
+        querySelectorAll() { return [] },
+        addEventListener() {},
+        removeEventListener() {},
+        dispatchEvent() { return true },
+        click() {},
+        focus() {},
+        blur() {},
+        getBoundingClientRect() {
+            return {x: 0, y: 0, top: 0, right: 0, bottom: 0, left: 0, width: 0, height: 0}
         }
-    },
-    parentElement: head
+    }
+    return element
 }
+
+html = create_dom_element('html')
+head = create_dom_element('head')
+body = create_dom_element('body')
+documentElement = html
+html.appendChild(head)
+html.appendChild(body)
+
+div = create_dom_element('div')
+form = create_dom_element('form')
+input = create_dom_element('input')
+n = create_dom_element('div')
+script = create_dom_element('script')
+script.setAttribute('r', 'm')
+script.src = location.origin + '/.well-known/rs/challenge.js'
+head.appendChild(script)
 
 meta = [
     {
@@ -190,25 +325,34 @@ const cookie_store = new Map()
 
 function create_anchor() {
     let parsed = new URL(location.href)
-    return {
-        set href(value) { parsed = new URL(value, location.href) },
-        get href() { return parsed.href },
-        get origin() { return parsed.origin },
-        get protocol() { return parsed.protocol },
-        get host() { return parsed.host },
-        get hostname() { return parsed.hostname },
-        get port() { return parsed.port },
-        get pathname() { return parsed.pathname },
-        get search() { return parsed.search },
-        get hash() { return parsed.hash },
-        setAttribute(name, value) { this[name] = value },
-        getAttribute(name) { return this[name] }
-    }
+    const anchor = create_dom_element('a')
+    Object.defineProperties(anchor, {
+        href: {
+            configurable: true,
+            enumerable: true,
+            get() { return parsed.href },
+            set(value) { parsed = new URL(value, location.href) }
+        },
+        origin: {configurable: true, enumerable: true, get() { return parsed.origin }},
+        protocol: {configurable: true, enumerable: true, get() { return parsed.protocol }},
+        host: {configurable: true, enumerable: true, get() { return parsed.host }},
+        hostname: {configurable: true, enumerable: true, get() { return parsed.hostname }},
+        port: {configurable: true, enumerable: true, get() { return parsed.port }},
+        pathname: {configurable: true, enumerable: true, get() { return parsed.pathname }},
+        search: {configurable: true, enumerable: true, get() { return parsed.search }},
+        hash: {configurable: true, enumerable: true, get() { return parsed.hash }}
+    })
+    return anchor
 }
 
 // get_enviroment(['meta[1]'])
 
+const anchor_element = create_anchor()
+anchor_element.id = '__anchor__'
+body.appendChild(anchor_element)
+
 document = {
+    nodeType: 9,
     addEventListener: window.addEventListener,
     removeEventListener: window.removeEventListener,
     dispatchEvent: window.dispatchEvent,
@@ -220,7 +364,7 @@ document = {
         if (args[0] == 'a') {
             return create_anchor()
         }
-        return {}
+        return create_dom_element(args[0])
     },
     appendChild: function (...args) {
         console.log(args)
@@ -233,11 +377,39 @@ document = {
         if (args[0] == 'meta') {
             return meta
         }
+        if (args[0] == 'script') {
+            return [script]
+        }
+        if (args[0] == 'head') {
+            return [head]
+        }
+        if (args[0] == 'body') {
+            return [body]
+        }
+        if (args[0] == 'html') {
+            return [html]
+        }
         return []
     },
     getElementById: function (...args) {
         console.log(args)
-        return {}
+        if (args[0] === '__anchor__') return anchor_element
+        return null
+    },
+    querySelector: function (selector) {
+        if (selector === 'script' || selector === 'script[r="m"]') return script
+        if (selector === '#__anchor__') return anchor_element
+        if (selector === 'head') return head
+        if (selector === 'body') return body
+        if (selector === 'html') return html
+        return null
+    },
+    querySelectorAll: function (selector) {
+        const match = this.querySelector(selector)
+        return match ? [match] : []
+    },
+    createExpression: function () {
+        return {evaluate() { return {singleNodeValue: null, snapshotLength: 0} }}
     },
     get cookie() {
         return Array.from(cookie_store.entries())
@@ -254,7 +426,25 @@ document = {
         }
     },
     visibilityState: 'visible',
-    addEventListener:function (){}
+    hidden: false,
+    readyState: 'complete',
+    characterSet: 'UTF-8',
+    charset: 'UTF-8',
+    compatMode: 'CSS1Compat',
+    URL: location.href,
+    documentURI: location.href,
+    baseURI: location.href,
+    referrer: location.href,
+    location: location,
+    documentElement: documentElement,
+    head: head,
+    body: body,
+    currentScript: script
+}
+document.defaultView = window
+
+for (const element of [html, head, body, div, form, input, script, anchor_element]) {
+    element.ownerDocument = document
 }
 
 

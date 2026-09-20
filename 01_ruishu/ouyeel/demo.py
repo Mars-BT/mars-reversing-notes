@@ -64,7 +64,13 @@ cookies = {}
 for item in cookie.split('; '):
     cookie_name, cookie_value = item.split('=', 1)
     cookies[cookie_name] = cookie_value
-session.cookies.update(cookies)
+# Replace values in the Session jar instead of also passing a per-request
+# cookie mapping.  Otherwise requests emits duplicate names in Cookie.
+for stored_cookie in list(session.cookies):
+    if stored_cookie.name in cookies:
+        session.cookies.clear(stored_cookie.domain, stored_cookie.path, stored_cookie.name)
+for cookie_name, cookie_value in cookies.items():
+    session.cookies.set(cookie_name, cookie_value, domain='www.ouyeel.com', path='/')
 print('calculated cookies:', list(cookies))
 
 # Complete the browser's challenge/reload flow.  The first response is only the
@@ -72,7 +78,6 @@ print('calculated cookies:', list(cookies))
 page_response = session.get(
     'https://www.ouyeel.com/steel/search',
     params={'channel': 'RJ', 'pageIndex': '0', 'pageSize': '50'},
-    cookies=cookies,
     headers=headers,
 )
 print('page after cookie:', page_response.status_code, page_response.headers.get('Content-Type'), len(page_response.content))
@@ -109,7 +114,6 @@ data = {
 response = session.post(
     api_url,
     params=params,
-    cookies=cookies,
     headers=headers,
     data=data,
 )
