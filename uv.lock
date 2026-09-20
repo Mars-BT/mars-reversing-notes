@@ -136,6 +136,23 @@ wheels = [
 ]
 
 [[package]]
+name = "iv8"
+version = "0.1.4"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/28/3d/e7b44e11f3f259964f3d1dba41e40b0748884131af32b5ee6e46bd8c59c9/iv8-0.1.4-cp313-cp313-macosx_14_0_arm64.whl", hash = "sha256:b596a16a581b4785c97156fc163f3b2742d74f2f4bb0faf33d5d2006fbd41b10", size = 74886861, upload-time = "2026-07-15T08:43:19.247Z" },
+    { url = "https://files.pythonhosted.org/packages/83/34/80235843b3b14cad3fa069ba6c803d27d5350bc249f639e2ccc8d630824e/iv8-0.1.4-cp313-cp313-macosx_14_0_x86_64.whl", hash = "sha256:7d280601a460a292ac4b1483bca60fa0ca432f71ed2f560ea3662d85b6fab3b1", size = 90537245, upload-time = "2026-07-15T08:43:40.433Z" },
+    { url = "https://files.pythonhosted.org/packages/4c/27/0e19fd6a2e25cd0ee243b4dfd44ddb68d20f5bb13a18b85087475b823700/iv8-0.1.4-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:bc1dd7adc762212f76f83362467ddd85fdfe7025c5c88859f7ad6dcb0dd4d3a4", size = 74787755, upload-time = "2026-07-15T08:43:56.319Z" },
+    { url = "https://files.pythonhosted.org/packages/5a/5b/7a667cef3bb5ee68363f8e2d23cd99e6795d6e5ee653e91eeef8ce6a21b4/iv8-0.1.4-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:a646f8a003ee9f1dd98381e005d185e83970eb5ff45228928ba659c45e729b04", size = 83945477, upload-time = "2026-07-15T08:44:13.522Z" },
+    { url = "https://files.pythonhosted.org/packages/35/1e/aac9fa7e4ecdfc57a9598215222f248461265032c24a565219b9f46f0708/iv8-0.1.4-cp313-cp313-win_amd64.whl", hash = "sha256:9099eb5b8037b5ee5a4e6ef8cb71c3d69f9169e9dac8f79d26b8dc9b8c382865", size = 52547816, upload-time = "2026-07-15T08:44:26.706Z" },
+    { url = "https://files.pythonhosted.org/packages/fe/8e/9616296ee6b43284c1016ac8bb92c7a16b9e7bdc533d13dff09b1403e1b4/iv8-0.1.4-cp314-cp314-macosx_14_0_arm64.whl", hash = "sha256:1324383bd0a0250f773b28c80ba4f2138afd6c4248d7e6a52830a5efa7552932", size = 91423950, upload-time = "2026-07-15T08:44:44.1Z" },
+    { url = "https://files.pythonhosted.org/packages/84/79/b41c40fe977e2f50f4977dfda33b30bda8745a24ac9da212170f0f74777e/iv8-0.1.4-cp314-cp314-macosx_14_0_x86_64.whl", hash = "sha256:c150c90b80eabae063c645f2125e15b9cf818c46c0cbe31b5161ff9c306356fa", size = 90547341, upload-time = "2026-07-15T08:45:02.444Z" },
+    { url = "https://files.pythonhosted.org/packages/2a/b8/3e2b10b47eab1dbd9aeb48c0cae2bb385608645b1590bb7dfa2c5b19e8bc/iv8-0.1.4-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:87b4cadc717d674419f91b940a98b51c23d91beea235161985c03ade004c3ebc", size = 74815096, upload-time = "2026-07-15T08:45:18.347Z" },
+    { url = "https://files.pythonhosted.org/packages/f3/02/84a04252e7c6e919cba3c00a65cb0728dee8da78006fba95f97863fd108d/iv8-0.1.4-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:3c8deace89a9bbfee366f93e47436826c52852bef80e3991dea472c868c60bcc", size = 83947954, upload-time = "2026-07-15T08:45:34.035Z" },
+    { url = "https://files.pythonhosted.org/packages/d6/5c/7e0cdeb21a5c1bf314f733ee87a05de8c1d6853dfbbb4498c7f9b2530f62/iv8-0.1.4-cp314-cp314-win_amd64.whl", hash = "sha256:2fafb1cd36866c39f4184b8bfd6d913c4b1982b0106fe742ef3990c57d8cd915", size = 53338867, upload-time = "2026-07-15T08:45:46.902Z" },
+]
+
+[[package]]
 name = "lxml"
 version = "6.1.3"
 source = { registry = "https://pypi.org/simple" }
@@ -232,12 +249,14 @@ name = "mars-reversing-notes"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "iv8" },
     { name = "lxml" },
     { name = "requests" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "iv8", specifier = ">=0.1.4" },
     { name = "lxml", specifier = ">=6.1.3" },
     { name = "requests", specifier = ">=2.34.2" },
 ]
