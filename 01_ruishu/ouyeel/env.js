@@ -33,6 +33,18 @@ window.addEventListener = function (...args) {
     console.log(args)
 }
 
+setTimeout = function (){}
+setInterval = function (){}
+
+var req_param
+
+const XMLHttpRequest = function () { }
+XMLHttpRequest.prototype.open = function (method, url, args) {
+    console.log("==========================")
+    console.log(method, url)
+    req_param = url
+}
+
 location = {
     "ancestorOrigins": {},
     "href": "https://www.ouyeel.com/steel/search?channel=RJ&pageIndex=0&pageSize=50",
@@ -54,21 +66,22 @@ div = {
 
 meta = [
     {
-        getAttribute: function (...args) {
-            console.log(args)
-            return 'm'
-        },
     },
     {
         getAttribute: function (...args) {
             console.log(args)
             return 'm'
         },
+        parentNode: {
+            removeChild: function (...args) {
+                console.log(args)
+            }
+        }
     }
 ]
 meta.length = 2
 
-get_enviroment(['div'])
+// get_enviroment(['meta[1]'])
 
 document = {
     createElement: function (...args) {
@@ -90,7 +103,24 @@ document = {
             return meta
         }
         return []
+    },
+    getElementById: function (...args) {
+        console.log(args)
+        return {}
     }
 }
 
 get_enviroment(proxy_array)
+
+function get_curr(_url){
+    const urls = new URL(_url)
+    const pathname = urls.pathname
+    const search = urls.search
+    const path = pathname + search
+    const g = new XMLHttpRequest()
+    g.open('POST', path,true)
+    console.log("原来============"+_url)
+    console.log("后缀============"+req_param)
+}
+
+get_curr('https://www.ouyeel.com/search-ng/commoditySearch/queryCommodityResult')
