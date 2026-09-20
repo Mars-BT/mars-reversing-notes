@@ -1,13 +1,14 @@
 import os
-from tkinter import constants
+import json
 
 import requests
 from lxml import etree
 import execjs
+from urllib.parse import urlsplit, parse_qsl
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-requests = requests.Session()
+session = requests.Session()
 
 headers = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -33,14 +34,25 @@ params = {
     'pageSize': '50',
 }
 
-response = requests.get('https://www.ouyeel.com/steel/search', params=params, headers=headers)
+response = session.get('https://www.ouyeel.com/steel/search', params=params, headers=headers)
+print('server cookies:', list(session.cookies.keys()))
 html = etree.HTML(response.text)
 ts_code = html.xpath('//script[1]/text()')[0]
+boot_code = html.xpath('//script[last()]/text()')[0]
 ENC_JS = os.path.join(BASE_DIR, 'enc.js')
+BOOT_JS = os.path.join(BASE_DIR, 'boot.js')
+COOKIES_JS = os.path.join(BASE_DIR, 'cookies.js')
 DEMO_JS = os.path.join(BASE_DIR, 'demo.js')
 
 with open(ENC_JS, 'w', encoding='utf-8') as f:
     f.write(ts_code)
+
+with open(BOOT_JS, 'w', encoding='utf-8') as f:
+    f.write(boot_code)
+
+with open(COOKIES_JS, 'w', encoding='utf-8') as f:
+    for name, value in session.cookies.get_dict().items():
+        f.write(f'document.cookie = {json.dumps(f"{name}={value}")}\n')
 
 with open(DEMO_JS, 'r', encoding='utf-8') as f:
     ts_code = f.read()
@@ -48,8 +60,22 @@ with open(DEMO_JS, 'r', encoding='utf-8') as f:
 js = execjs.compile(ts_code, cwd=BASE_DIR)
 
 cookie = js.call('get_cookie')
-cookies = {cookie.split('=')[0]: cookie.split('=')[1]}
-print(cookies)
+cookies = {}
+for item in cookie.split('; '):
+    cookie_name, cookie_value = item.split('=', 1)
+    cookies[cookie_name] = cookie_value
+session.cookies.update(cookies)
+print('calculated cookies:', list(cookies))
+
+# Complete the browser's challenge/reload flow.  The first response is only the
+# RS bootstrap page; the protected application is returned after this cookie.
+page_response = session.get(
+    'https://www.ouyeel.com/steel/search',
+    params={'channel': 'RJ', 'pageIndex': '0', 'pageSize': '50'},
+    cookies=cookies,
+    headers=headers,
+)
+print('page after cookie:', page_response.status_code, page_response.headers.get('Content-Type'), len(page_response.content))
 
 
 headers = {
@@ -70,16 +96,18 @@ headers = {
     'sec-ch-ua-platform': '"macOS"',
 }
 
-params = {
-    'K5nOZLud': 'xrShSAlqEJoxMp8d2v8RkJ5LAnOTTVm5krtClMEJR.GRm1gsLtnHElcoC9TN8rOdK53nBULIMBQWQ4_VuDMtcm163Cud3b34',
-}
+api_url = 'https://www.ouyeel.com/search-ng/commoditySearch/queryCommodityResult'
+protected_url = js.call('get_suffix', api_url)
+protected_parts = urlsplit(protected_url)
+params = dict(parse_qsl(protected_parts.query, keep_blank_values=True))
+print('protected url:', protected_url)
 
 data = {
     'criteriaJson': '{"pageSize":50,"industryComponent":null,"channel":null,"productType":null,"sort":null,"warehouseCode":null,"key_search":null,"is_central":null,"searchField":null,"companyCode":null,"inquiryCategory":null,"inquirySpec":null,"provider":null,"shopCode":null,"packCodes":null,"steelFactory":null,"resourceIds":null,"providerCode":null,"jsonParam":{"channel":"RJ","keywordAnalyseResult":null},"excludeShowSoldOut":null,"pageIndex":0,"maxPage":50}',
 }
 
-response = requests.post(
-    'https://www.ouyeel.com/search-ng/commoditySearch/queryCommodityResult',
+response = session.post(
+    api_url,
     params=params,
     cookies=cookies,
     headers=headers,
@@ -87,3 +115,11 @@ response = requests.post(
 )
 response.encoding = 'utf-8'
 print(response.status_code)
+print(response.headers.get('Content-Type'))
+try:
+    payload = response.json()
+    print('response keys:', list(payload) if isinstance(payload, dict) else type(payload).__name__)
+except ValueError:
+    print('response url:', response.url)
+    print('response length:', len(response.content))
+    print(repr(response.text[:300]))
