@@ -1,3 +1,4 @@
 *.xlsx
 test.html
 node_modules/
+enc.js
