@@ -38,7 +38,7 @@ def _ignore_cache(_dir, names):
     return [name for name in names if name in CACHE_DIRS]
 
 
-def _detect_system():
+def detect_system():
     if sys.platform == "darwin":
         return "mac"
     if sys.platform.startswith("win"):
@@ -69,7 +69,7 @@ def prepare_chrome_profile(dst, system=None, src=None, profile_name=None, refres
 
     注意：参数名用 system 而不是 os，避免遮蔽标准库 os 模块。
     """
-    system = system or _detect_system()
+    system = system or detect_system()
     src = src or os.path.expandvars(os.path.expanduser(DEFAULT_USER_DATA_DIRS[system]))
     if not os.path.isdir(src):
         raise FileNotFoundError(f"找不到 Chrome 用户数据目录，请用 src 指定: {src}")
