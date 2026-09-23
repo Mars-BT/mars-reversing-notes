@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "playwright": "^1.63.0"
+  },
+  "devDependencies": {
+    "node-gyp": "^13.0.2"
   }
 }
