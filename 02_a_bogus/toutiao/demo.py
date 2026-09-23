@@ -94,3 +94,6 @@ if __name__ == '__main__':
         title = (it.get('title') or it.get('Abstract') or '(无标题)').replace('\n', ' ')
         print('\n[{}] {}'.format(i, title[:60]))
         print('     来源:', it.get('source') or '-', '| 链接:', it.get('article_url') or '-')
+
+# cd 02_a_bogus/toutiao
+# python demo.py
