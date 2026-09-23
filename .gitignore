@@ -8,3 +8,4 @@ enc.js
 __pycache__
 .DS_Store
 .env
+env.log
