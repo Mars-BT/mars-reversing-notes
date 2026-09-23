@@ -1,0 +1,2 @@
+# 携程
+waf会检测requests库，因此使用curl_cffi库来模拟chrome请求
