@@ -739,7 +739,7 @@ Object.defineProperty(document, "all", {
  CanvasRenderingContext2D, WebGLRenderingContext
 ].forEach(markNative)
 
-get_enviroment(proxy_array)
+// get_enviroment(proxy_array)
 
 window.bdms || function() {
     var e = {
@@ -11784,14 +11784,72 @@ window.buildParams = async function(url) {
     }
 }
 
+// 请求接口用的 cookie（从浏览器复制，会过期，过期了换新的）
+const TARGET_COOKIE = [
+    'tt_webid=7688302036304545331',
+    'gfkadpd=24,6457',
+    'ttcid=b6a71a9388ac47d3a9871da7fd81c0f927',
+    'local_city_cache=%E6%B7%B1%E5%9C%B3',
+    'x-web-secsdk-uid=efbd16f0-c027-468a-8723-45d3f0724fe8',
+    'ttwid=1%7CyFR2ToFsw2YMqEZvAtkyPfsO7Q96aZpIZJPf2zVJADQ%7C1790072319%7C576444f690f95543a361a359f976e5d39951b01899515da2a0236c7c12633077',
+    'csrftoken=5f13433bc7711ae627d725533cef426a',
+    's_v_web_id=verify_muciu9nm_hZ36WWa5_q6xk_4xhH_ANeG_FrFYzanNePjS',
+    'tt_scid=MwjMvpmj7VcZ21APWbqtEeDnRkjQPELDOfORS8aJUO0Me8Kv3EbFlOjnDUlRtXuP99e3'
+].join('; ')
+
+// 时间戳 -> 可读时间
+function fmtTime(ts) {
+    if (!ts) return '-'
+    var d = new Date(ts * 1000)
+    var p = function(n) { return String(n).padStart(2, '0') }
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' +
+        p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds())
+}
+
 if (require.main === module) {
     (async function() {
-        var url = 'https://www.toutiao.com/api/pc/list/feed?channel_id=0&max_behot_time=1790063890&offset=0&category=pc_profile_recommend&aid=24&app_name=toutiao_web'
+        var url = 'https://www.toutiao.com/api/pc/list/feed?channel_id=0&max_behot_time=' +
+            Math.floor(Date.now() / 1000 - 10000) +
+            '&offset=0&category=pc_profile_recommend&aid=24&app_name=toutiao_web'
+
         var r = await window.buildParams(url)
-        console.log('\n===== 结果 =====')
-        console.log('msToken :', r.msToken || '(无：服务端返回 resultCode=-6)')
+        console.log('\n===== 请求参数 =====')
+        console.log('msToken :', r.msToken)
         console.log('a_bogus :', r.a_bogus)
-        console.log('最终 URL:', r.url)
+        console.log('请求 URL:', r.url)
+
+        var resp = await window.__realFetch(r.url, {
+            headers: {
+                'accept': 'application/json, text/plain, */*',
+                'accept-language': 'zh-CN,zh;q=0.9',
+                'referer': 'https://www.toutiao.com/',
+                'user-agent': UA,
+                'cookie': TARGET_COOKIE
+            }
+        })
+        var text = await resp.text()
+
+        console.log('\n===== 响应 =====')
+        console.log('HTTP status:', resp.status)
+
+        var j
+        try {
+            j = JSON.parse(text)
+        } catch (e) {
+            console.log('非 JSON 返回:', text.slice(0, 500))
+            process.exit(0)
+        }
+
+        console.log('message    :', j.message, '| has_more:', j.has_more, '| 条数:', (j.data || []).length)
+
+        console.log('\n===== 数据 =====')
+        ;(j.data || []).forEach(function(it, i) {
+            var title = it.title || it.Abstract || '(无标题)'
+            console.log('\n[' + (i + 1) + '] ' + String(title).replace(/\s+/g, ' ').slice(0, 60))
+            console.log('     来源:', it.source || '-', '| 时间:', fmtTime(it.publish_time || it.behot_time))
+            if (it.article_url) console.log('     链接:', it.article_url)
+        })
+
         process.exit(0)
     })()
 }
