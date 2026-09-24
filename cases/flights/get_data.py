@@ -1,4 +1,5 @@
 from curl_cffi import requests
+from lxml import etree
 
 cookies = {
     '_RGUID': '889fb183-97a5-4584-9c5d-f76db14500f6',
@@ -48,5 +49,18 @@ params = {
 }
 
 response = requests.get('https://trains.ctrip.com/webapp/train/list', params=params, cookies=cookies, headers=headers)
-print(response.text)
 print(response.status_code)
+tree = etree.HTML(response.text)
+items = tree.xpath('//section[@role="product"]/div[@class="card-white list-item"]')
+for item in items:
+    from_station = item.xpath('./div[2]')
+    if not from_station:
+        continue
+    from_station = item.xpath('./div[2]/div[1]/div[2]/text()')[0]
+    from_time = item.xpath('./div[2]/div[1]/div[1]/text()')[0]
+    to_station = item.xpath('./div[2]/div[3]/div[2]/text()')[0]
+    to_time = item.xpath('./div[2]/div[3]/div[1]/text()')[0]
+    checi = item.xpath('.//div[@class="checi"]/text()')[0]
+    haoshi = item.xpath('.//div[@class="haoshi"]/text()')[0]
+    # print(f'车次 {checi}')
+    print(f'从 {from_station} 出发，时间 {from_time}，到达 {to_station}，时间 {to_time}，车次 {checi}，耗时 {haoshi}')
