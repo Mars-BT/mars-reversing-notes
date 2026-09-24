@@ -6,7 +6,7 @@ function get_enviroment(proxy_array) {
             '"' +  proxy_array[i] + '"  ,' +
             '"  属性:", property, ' +
             '"  属性类型:", ' + 'typeof property, ' +
-            // '"  属性值:", ' + 'target[property], ' +
+            '"  属性值:", ' + 'target[property], ' +
             '"  属性值类型:", typeof target[property]);\n' +
             '        return target[property];\n' +
             '     },\n' +
@@ -15,7 +15,7 @@ function get_enviroment(proxy_array) {
             '"' +  proxy_array[i] + '"  ,' +
             '"  属性:", property, ' +
             '"  属性类型:", ' + 'typeof property, ' +
-            // '"  属性值:", ' + 'target[property], ' +
+            '"  属性值:", ' + 'target[property], ' +
             '"  属性值类型:", typeof target[property]);\n' +
             '       return Reflect.set(...arguments);\n' +
             '    }\n' +
@@ -36,6 +36,22 @@ window.top = window
 // 结果 window.mnsv2 不会被定义。所以这里必须把 DOM 补齐。
 
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36'
+
+// ---------- 0. 伪原生 toString（参考 02_a_bogus/toutiao/env.js）----------
+// SDK 会用 fn.toString().indexOf('[native code]') 判断环境有没有被篡改，
+// 这里让桩函数在 toString 时表现得像原生函数
+const __nativeFns = new WeakSet()
+const __origFnToString = Function.prototype.toString
+Function.prototype.toString = function () {
+    if (__nativeFns.has(this)) {
+        return 'function ' + (this.name || '') + '() { [native code] }'
+    }
+    return __origFnToString.call(this)
+}
+function markNative(fn) {
+    if (typeof fn === 'function') __nativeFns.add(fn)
+    return fn
+}
 
 // ---------- 1. 极简 DOM ----------
 // 虚拟机用 new Function 编译过一段环境检测：枚举 document 里所有标签名，
@@ -86,6 +102,9 @@ function makeElement(tag) {
         removeAttribute: function (name) { delete this.attributes[name] },
         hasAttribute: function (name) { return name in this.attributes },
         appendChild: function (child) {
+            // 虚拟机偶尔会拿垃圾值来 append/remove（DOM 探针里见过传 undefined / window），
+            // 这里必须容错：一旦抛出 TypeError 会被它的字节码 try/catch 静默吞掉，流程就跑偏了
+            if (child === null || typeof child !== 'object') return child
             child.parentNode = this
             child.parentElement = this
             this.children.push(child)
@@ -94,6 +113,7 @@ function makeElement(tag) {
         },
         insertBefore: function (child) { return this.appendChild(child) },
         removeChild: function (child) {
+            if (child === null || typeof child !== 'object') return child
             const i = this.children.indexOf(child)
             if (i >= 0) { this.children.splice(i, 1); this.childNodes.splice(i, 1) }
             child.parentNode = null
@@ -192,7 +212,8 @@ document = {
     forms: [],
     links: [],
     styleSheets: [],
-    all: [],
+    // 注意：真机上 document.all 的 typeof 是 'undefined'（HTMLAllCollection 的怪癖），
+    // 且 !document.all 为 true。给成数组/对象会被浏览器检测一眼识破，所以这里留空。
     addEventListener: function () {},
     removeEventListener: function () {},
     dispatchEvent: function () { return true },
@@ -243,6 +264,52 @@ document.documentElement.appendChild(document.body)
 
 document.scripts = [vmpScript]
 document.currentScript = vmpScript
+
+// document 自身的节点标识，以及"向上收口"：真机上 html.parentNode 就是 document。
+// 虚拟机有个助手函数是从某个节点沿 parentNode 往上遍历、遇到 nodeType===9 才停，
+// 我们的 html.parentNode 若是 null，它会在中途断掉。
+document.nodeType = 9
+document.nodeName = '#document'
+document.defaultView = window
+document.ownerDocument = null
+document.documentElement.parentNode = document
+collectElements(document.documentElement, []).forEach(function (el) {
+    el.ownerDocument = document
+})
+
+// document.cookie 也必须是读写回环：真机写进去再读出来只有 "name=value"，
+// domain / path / max-age 这些属性不会出现在读回结果里
+const cookieJar = {}
+Object.defineProperty(document, 'cookie', {
+    configurable: true,
+    get: function () {
+        return Object.keys(cookieJar).map(k => k + '=' + cookieJar[k]).join('; ')
+    },
+    set: function (v) {
+        const raw = String(v)
+        const first = raw.split(';')[0]
+        const eq = first.indexOf('=')
+        if (eq <= 0) return
+        const name = first.slice(0, eq).trim()
+        const value = first.slice(eq + 1).trim()
+        if (!value || /max-age=0/i.test(raw)) delete cookieJar[name]
+        else cookieJar[name] = value
+    },
+})
+
+// document.all：真机上是 HTMLAllCollection，typeof 却是 'undefined'（[[IsHTMLDDA]] 语义），
+// 纯 JS 造不出来。借原生 addon（对应 02_a_bogus/toutiao/document_all.cc 的 MarkAsUndetectable）
+try {
+    const path = require('path')
+    const documentAll = require(path.join(__dirname, '..', '..', '02_a_bogus', 'toutiao', 'document_all.node')).createDocumentAll()
+    Object.defineProperty(document, 'all', {
+        configurable: true,
+        enumerable: false,
+        get: function () { return documentAll },
+    })
+} catch (e) {
+    // addon 不可用时退化成不定义（typeof document.all 同样是 'undefined'）
+}
 
 // ---------- 2. navigator ----------
 // Node 里 navigator 是 globalThis 上的只读 getter，直接赋值不生效，得用 defineProperty
@@ -369,16 +436,22 @@ history = {
     go: function () {},
 }
 
-const storage = {
-    length: 0,
-    getItem: function () { return null },
-    setItem: function () {},
-    removeItem: function () {},
-    clear: function () {},
-    key: function () { return null },
+// 必须是真正的读写回环：虚拟机常写入一个值再读回来校验，空实现会被判定为异常环境
+function makeStorage() {
+    const data = {}
+    return {
+        get length() { return Object.keys(data).length },
+        key: function (i) { return Object.keys(data)[i] === undefined ? null : Object.keys(data)[i] },
+        getItem: function (k) {
+            return Object.prototype.hasOwnProperty.call(data, String(k)) ? data[String(k)] : null
+        },
+        setItem: function (k, v) { data[String(k)] = String(v) },
+        removeItem: function (k) { delete data[String(k)] },
+        clear: function () { Object.keys(data).forEach(k => delete data[k]) },
+    }
 }
-localStorage = storage
-sessionStorage = storage
+localStorage = makeStorage()
+sessionStorage = makeStorage()
 
 // ---------- 4. window 上的其它属性 ----------
 window.self = window
@@ -435,7 +508,16 @@ window.atob = globalThis.atob || function (s) { return Buffer.from(s, 'base64').
 
 // 构造器桩：虚拟机大量做 typeof / instanceof 探测
 window.Screen = function Screen() {}
-window.MouseEvent = function MouseEvent() {}
+window.MouseEvent = function MouseEvent(type, init) {
+    this.type = type
+    this.x = 0; this.y = 0
+    this.screenX = 0; this.screenY = 25
+    this.clientX = 0; this.clientY = 0
+    this.movementX = 0; this.movementY = 0
+    this.isTrusted = true
+    this.timeStamp = Date.now()
+    Object.assign(this, init || {})
+}
 window.KeyboardEvent = function KeyboardEvent() {}
 window.PointerEvent = function PointerEvent() {}
 window.TouchEvent = function TouchEvent() {}
@@ -472,4 +554,78 @@ window.File = function File() {}
 window.FileReader = function FileReader() {}
 window.FormData = function FormData() {}
 
+// ---------- 5. 让被探测的对象更像真机 ----------
+// 真机 Screen.prototype 上是 width/height 这些 getter，且 screen.__proto__ 指向它；
+// 用 Proxy 包一层，Function.prototype.toString 会报 [native code]，躲过原生性检测
+;(function () {
+    const proto = window.Screen.prototype
+    for (const key of ['width', 'height', 'availWidth', 'availHeight', 'colorDepth', 'pixelDepth', 'availLeft', 'availTop']) {
+        Object.defineProperty(proto, key, {
+            get: new Proxy(function () { return screen[key] }, {}),
+            configurable: true,
+            enumerable: true,
+        })
+    }
+    Object.setPrototypeOf(screen, proto)
+})()
+
+// navigator.plugins / mimeTypes 在真机上是 PluginArray / MimeTypeArray
+Object.defineProperty(fakeNavigator.plugins, Symbol.toStringTag, { value: 'PluginArray' })
+Object.defineProperty(fakeNavigator.mimeTypes, Symbol.toStringTag, { value: 'MimeTypeArray' })
+
+// documentElement 的布局属性（真机上有值）
+Object.assign(document.documentElement, {
+    clientWidth: 1920, clientHeight: 971,
+    offsetWidth: 1920, offsetHeight: 971,
+    scrollWidth: 1920, scrollHeight: 971,
+})
+
+// 页面级全局（真机上这些是站点脚本挂上去的）
+window.webpackChunkxhs_pc_web = []
+window.XHS_CALLBACKS = {}
+window.XHSInvokeCallback = function () {}
+window.XHSCallbacks = []
+window.XHSEvents = {}
+window.__XHS_AGENT_V2 = {}
+
 get_enviroment(proxy_array)
+
+// 真机上 window.navigator / document / location / screen / history / localStorage ...
+// 都是 accessor（带 getter 的访问器属性），不是数据属性。
+// 虚拟机很早就会检查这些全局的描述符形态，数据属性会被它一眼识破。
+;(function () {
+    for (const name of [
+        'document', 'navigator', 'location', 'screen', 'history',
+        'localStorage', 'sessionStorage', 'performance', 'crypto', 'WebAssembly',
+    ]) {
+        const value = globalThis[name]
+        if (value === undefined) continue
+        // 用 Proxy 包 getter，Function.prototype.toString 会报 [native code]
+        const getter = new Proxy(function () { return value }, {})
+        try {
+            Object.defineProperty(globalThis, name, {
+                configurable: true,
+                enumerable: true,
+                get: getter,
+            })
+        } catch (e) {}
+    }
+})()
+
+// 把补出来的桩函数标记为「原生」，绕开 [native code] 篡改检测
+// （放在最后，保证引用的对象都已创建）
+;[
+    document.addEventListener, document.removeEventListener, document.dispatchEvent,
+    document.createElement, document.createElementNS, document.querySelector,
+    document.querySelectorAll, document.getElementsByTagName, document.getElementById,
+    document.hasFocus, document.write, document.writeln, document.open, document.close,
+    window.addEventListener, window.removeEventListener, window.dispatchEvent,
+    window.requestAnimationFrame, window.cancelAnimationFrame, window.matchMedia,
+    window.getComputedStyle, window.btoa, window.atob,
+    window.scrollTo, window.scrollBy, window.postMessage,
+    fakeNavigator.sendBeacon, fakeNavigator.javaEnabled,
+    fakeNavigator.addEventListener, fakeNavigator.removeEventListener,
+    localStorage.getItem, localStorage.setItem, localStorage.removeItem, localStorage.clear, localStorage.key,
+    sessionStorage.getItem, sessionStorage.setItem, sessionStorage.removeItem, sessionStorage.clear, sessionStorage.key,
+    window.insight.sendCustomPoint, window.insight.track, window.insight.report,
+].forEach(markNative)

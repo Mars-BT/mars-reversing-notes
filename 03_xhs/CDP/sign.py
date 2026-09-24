@@ -137,7 +137,8 @@ SIGN_JS = """([path, bodyJson]) => {
 }"""
 
 # 在页面脚本执行前注入：记录站内请求的 X-s / X-t / X-S-Common，用来对照我们自己算的对不对
-CAPTURE_JS = """() => {
+# 注意 add_init_script 要的是脚本体，必须写成 IIFE（只写箭头函数不会被调用）
+CAPTURE_JS = """(() => {
     window.__xhs = [];
     const push = (u, h) => {
         if (!h) return;
@@ -151,7 +152,7 @@ CAPTURE_JS = """() => {
     XMLHttpRequest.prototype.send = function () { const self = this; self.addEventListener('load', () => push(self.__u, self.__h)); return ps.apply(this, arguments); };
     const of = window.fetch;
     window.fetch = function (i, init) { const r = of.apply(this, arguments); try { push(typeof i === 'string' ? i : i && i.url, init && init.headers); } catch (e) {} return r; };
-}"""
+})()"""
 
 
 def ensure_page_target(cdp_url):
