@@ -61,12 +61,14 @@ setTimeout(() => {
     };
     const Xs = 'XYS_' + b64Encode(Buffer.from(JSON.stringify(S), 'utf8'));
 
-    // X-S-Common 是设备级、不随请求变化的值，这里直接用凭证文件里的原值重新编码。
-    // 注意：必须原样使用，随意改写里面的时间戳字段会直接 461。
+    // X-S-Common：用 xs_common.js（离线复刻的 xsCommon）从设备原值现算；
+    // 缺原值才退回凭证里抓到的成品/明文
     let common = '';
     try {
         const creds = JSON.parse(fs.readFileSync(DIR + 'creds.json', 'utf8'));
-        if (creds.common_plain) common = b64Encode(Buffer.from(creds.common_plain, 'utf8'));
+        if (creds.xsc_inputs) common = require(DIR + 'xs_common.js').buildXsc(creds.xsc_inputs).encoded;
+        else if (creds.xsc) common = creds.xsc;
+        else if (creds.common_plain) common = b64Encode(Buffer.from(creds.common_plain, 'utf8'));
     } catch (e) {}
 
     process.stdout.write(JSON.stringify({
