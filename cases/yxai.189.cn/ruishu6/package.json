@@ -1,0 +1,20 @@
+{
+  "name": "yxai.189.cn",
+  "version": "1.0.0",
+  "description": "- ts.js 是加密数据 vm js代码  - iBlPiBtflxq4.81fbd34.js 是解密  - env.js 补环境  - main.js 是主程序 （编写逆向）",
+  "main": "main.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.13.5",
+    "crypto-js": "^4.2.0"
+  }
+}

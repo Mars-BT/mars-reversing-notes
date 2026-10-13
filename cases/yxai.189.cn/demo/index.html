@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>滑块验证码轨迹录制</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f2f5;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .captcha-widget {
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            width: 320px; /* 限制整体宽度 */
+        }
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 55%; /* 假设图片比例，可根据实际调整，或者直接用固定的height */
+            overflow: hidden;
+            border-radius: 4px;
+            margin-bottom: 15px; /* 图片和滑块条的间距 */
+            background-color: #eee; /* 图片加载前的占位色 */
+        }
+        .bg-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            user-select: none;
+            -webkit-user-drag: none;
+            object-fit: cover; /* 或者是 contain，取决于需求 */
+        }
+        .slider-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            /* 关键修改：高度100%，宽度自适应，左上角对齐 */
+            height: 100%; 
+            width: auto; 
+            cursor: pointer;
+            z-index: 10;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+        .slider-track-container {
+            position: relative;
+            width: 100%;
+            height: 40px;
+            background-color: #e8e8e8;
+            border-radius: 20px; /* 圆角 */
+            box-shadow: inset 0 0 2px rgba(0,0,0,0.1);
+        }
+        .slider-text {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #999;
+            font-size: 14px;
+            user-select: none;
+            z-index: 1;
+        }
+        .slider-btn {
+            width: 44px; /* 稍微大一点更好按 */
+            height: 44px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 50%; /* 圆形按钮 */
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+            position: absolute;
+            left: 0;
+            top: -2px; /* 稍微上移一点，居中对齐轨道 */
+            z-index: 20;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            color: #666;
+            font-weight: bold;
+        }
+        .slider-btn:hover {
+            background-color: #f9f9f9;
+            box-shadow: 0 0 8px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+<div class="captcha-widget">
+    <div class="image-container">
+        <img src="./background.png" class="bg-img" alt="Background">
+        <img src="./slider.png" class="slider-img" id="slider" alt="Slider">
+    </div>
+    
+    <div class="slider-track-container">
+        <div class="slider-text">向右滑动填充拼图</div>
+        <div class="slider-btn" id="sliderBtn">→</div>
+    </div>
+</div>
+
+<script>
+    const sliderBtn = document.getElementById('sliderBtn');
+    const slider = document.getElementById('slider');
+    const trackContainer = document.querySelector('.slider-track-container');
+    const imageContainer = document.querySelector('.image-container');
+    
+    let isDragging = false;
+    let startX = 0;
+    let trackList = [];
+    let startTime = 0;
+    let fixedDecimal = 0; // 用于存储固定的X轴小数部分
+
+    // 模拟Y轴抖动
+    function getYJitter() {
+        // 生成 -2.5 到 0.5 之间的随机抖动，模拟手抖
+        // 参考数据: 0, -0.5, -1.5, -2.5
+        const jitters = [0, -0.5, -0.5, -1.0, -1.5, -2.0, -2.5];
+        return jitters[Math.floor(Math.random() * jitters.length)];
+    }
+
+    sliderBtn.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        startTime = Date.now();
+        
+        // 生成一个固定的随机小数部分 (0 到 1 之间)，用于模拟指纹或精度特征
+        // 保证 toFixed(8) 后有意义，这里直接生成
+        fixedDecimal = Math.random();
+
+        trackList = [];
+        // 记录按下事件
+        trackList.push({
+            x: 0,
+            y: 0,
+            type: "down",
+            t: parseInt(Date.now().toString().slice(-4)) // 取时间戳后4位
+        });
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    });
+
+    function onMouseMove(e) {
+        if (!isDragging) return;
+
+        const currentX = e.clientX;
+        
+        let moveX = currentX - startX;
+
+        // 限制滑动范围：基于轨道宽度减去按钮宽度
+        const maxMove = trackContainer.clientWidth - sliderBtn.clientWidth;
+        if (moveX < 0) moveX = 0;
+        if (moveX > maxMove) moveX = maxMove;
+
+        // 更新UI
+        sliderBtn.style.left = moveX + 'px';
+        slider.style.left = moveX + 'px'; // 滑块图与按钮保持1:1联动
+
+        // 构造带固定小数位的 X
+        // 取整数部分 + 固定的随机小数部分
+        let finalX = parseFloat((Math.floor(moveX) + fixedDecimal).toFixed(8));
+
+        // 记录轨迹
+        trackList.push({
+            x: finalX, 
+            y: getYJitter(),
+            type: "move",
+            t: parseInt(Date.now().toString().slice(-4)) // 取时间戳后4位
+        });
+    }
+
+    function onMouseUp(e) {
+        if (!isDragging) return;
+        isDragging = false;
+
+        const currentX = e.clientX;
+        let moveX = currentX - startX;
+        
+        // 限制范围计算最终X
+        const maxMove = trackContainer.clientWidth - sliderBtn.clientWidth;
+        if (moveX < 0) moveX = 0;
+        if (moveX > maxMove) moveX = maxMove;
+
+        // 构造带固定小数位的 X
+        let finalX = parseFloat((Math.floor(moveX) + fixedDecimal).toFixed(8));
+
+        // 记录抬起事件
+        trackList.push({
+            x: finalX,
+            y: -2.5, // 结束时通常会有一个固定的或者是最后的抖动值
+            type: "up",
+            t: parseInt(Date.now().toString().slice(-4)) // 取时间戳后4位
+        });
+
+        console.log('轨迹数据 (Track List):');
+        console.log(JSON.stringify(trackList, null, 4));
+        
+        // 移除事件监听
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        
+        // 可选：重置位置
+        // setTimeout(() => {
+        //     sliderBtn.style.left = '0px';
+        //     slider.style.left = '0px';
+        // }, 1000);
+    }
+</script>
+
+</body>
+</html>

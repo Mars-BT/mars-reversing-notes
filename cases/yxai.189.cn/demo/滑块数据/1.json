@@ -1,0 +1,182 @@
+{
+    "actId": 1447943696891904,
+    "deviceId": "17708618926926105505_CUbsz3ot7UOMzisPkepbzr8B6QI6zeg8",
+    "salesId": "00000000000f0977ed2b11f0a2fbfa163e6607b1",
+    "serialNumber": "HR202602120957470001",
+    "shopId": "lmk.cps.ybsclxcardzbfwmghzpt.152904100_Y51000022934",
+    "sysCode": "S054680",
+    "phoneNumber": "17764911316",
+    "signCode": "f08fabb01954d890c8fd9cbc0425475e",
+    "consigneeInfo": {
+        "sendProvince": "002041",
+        "sendCity": "002041016",
+        "sendCounty": "002041016082",
+        "sendProvinceName": "四川",
+        "sendCityName": "广安市",
+        "sendCountyName": "市辖区",
+        "sendCusname": "张三",
+        "sendCusmobile": "13900071234",
+        "sendAddress": "花园3号楼202室"
+    },
+    "customers": {
+        "customerName": "张三",
+        "certificateInfoType": "IDENTITY_CARD",
+        "certificateInfoNo": "110101198503127890"
+    },
+    "extInfo": {
+        "otherParamsByUrl": "",
+        "checkNetworkProtocolTime": "2026-02-12 16:36:56",
+        "checkNotificationTime": "2026-02-12 16:36:56",
+        "fingerprintValue": "d0930fb2-0ae2-47a0-b9ae-dcad83a5c213",
+        "overseasCallInterceptServiceStatus": 1,
+        "overseasMsgInterceptServiceStatus": 1,
+        "overseasCallInterceptServiceTime": "",
+        "overseasMsgInterceptServiceTime": ""
+    },
+    "overseasConfig": 2,
+    "validCaptcha": {
+        "id": "35e9f5d668204215ae99caeab71dc2ac",
+        "startSlidingTime": "2026-02-12T08:37:40.167Z",
+        "endSlidingTime": "2026-02-12T08:38:42.130Z",
+        "imageCaptchaTrack": {
+            "bgImageWidth": 260,
+            "bgImageHeight": 159,
+            "sliderImageWidth": 240,
+            "sliderImageHeight": 38,
+            "trackList": [
+                {
+                    "x": 0,
+                    "y": 0,
+                    "type": "down",
+                    "t": 61280
+                },
+                {
+                    "x": 9.04296875,
+                    "y": -0.5,
+                    "type": "move",
+                    "t": 61374
+                },
+                {
+                    "x": 12.04296875,
+                    "y": -0.5,
+                    "type": "move",
+                    "t": 61382
+                },
+                {
+                    "x": 15.04296875,
+                    "y": -0.5,
+                    "type": "move",
+                    "t": 61391
+                },
+                {
+                    "x": 18.04296875,
+                    "y": -0.5,
+                    "type": "move",
+                    "t": 61396
+                },
+                {
+                    "x": 21.04296875,
+                    "y": -0.5,
+                    "type": "move",
+                    "t": 61404
+                },
+                {
+                    "x": 25.04296875,
+                    "y": -0.5,
+                    "type": "move",
+                    "t": 61412
+                },
+                {
+                    "x": 29.04296875,
+                    "y": -0.5,
+                    "type": "move",
+                    "t": 61420
+                },
+                {
+                    "x": 32.04296875,
+                    "y": -0.5,
+                    "type": "move",
+                    "t": 61425
+                },
+                {
+                    "x": 35.04296875,
+                    "y": -0.5,
+                    "type": "move",
+                    "t": 61434
+                },
+                {
+                    "x": 38.04296875,
+                    "y": -0.5,
+                    "type": "move",
+                    "t": 61443
+                },
+                {
+                    "x": 42.04296875,
+                    "y": -1.5,
+                    "type": "move",
+                    "t": 61451
+                },
+                {
+                    "x": 45.04296875,
+                    "y": -1.5,
+                    "type": "move",
+                    "t": 61456
+                },
+                {
+                    "x": 49.04296875,
+                    "y": -1.5,
+                    "type": "move",
+                    "t": 61464
+                },
+                {
+                    "x": 52.04296875,
+                    "y": -2.5,
+                    "type": "move",
+                    "t": 61472
+                },
+                {
+                    "x": 56.04296875,
+                    "y": -2.5,
+                    "type": "move",
+                    "t": 61480
+                },
+                {
+                    "x": 57.04296875,
+                    "y": -2.5,
+                    "type": "move",
+                    "t": 61486
+                },
+                {
+                    "x": 59.04296875,
+                    "y": -2.5,
+                    "type": "move",
+                    "t": 61494
+                },
+                {
+                    "x": 59.04296875,
+                    "y": -2.5,
+                    "type": "move",
+                    "t": 61502
+                },
+                {
+                    "x": 60.04296875,
+                    "y": -2.5,
+                    "type": "move",
+                    "t": 61510
+                },
+                {
+                    "x": 60.04296875,
+                    "y": -2.5,
+                    "type": "move",
+                    "t": 61526
+                },
+                {
+                    "x": 60.04296875,
+                    "y": -2.5,
+                    "type": "up",
+                    "t": 61963
+                }
+            ]
+        }
+    }
+}

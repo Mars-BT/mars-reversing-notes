@@ -1,0 +1,284 @@
+{
+    "actId": 1447943696891904,
+    "deviceId": "17708618926926105505_CUbsz3ot7UOMzisPkepbzr8B6QI6zeg8",
+    "salesId": "00000000000f0977ed2b11f0a2fbfa163e6607b1",
+    "serialNumber": "HR202602120957470001",
+    "shopId": "lmk.cps.ybsclxcardzbfwmghzpt.152904100_Y51000022934",
+    "sysCode": "S054680",
+    "phoneNumber": "17764911316",
+    "signCode": "f08fabb01954d890c8fd9cbc0425475e",
+    "consigneeInfo": {
+        "sendProvince": "002041",
+        "sendCity": "002041016",
+        "sendCounty": "002041016082",
+        "sendProvinceName": "四川",
+        "sendCityName": "广安市",
+        "sendCountyName": "市辖区",
+        "sendCusname": "张三",
+        "sendCusmobile": "13900071234",
+        "sendAddress": "花园3号楼202室"
+    },
+    "customers": {
+        "customerName": "张三",
+        "certificateInfoType": "IDENTITY_CARD",
+        "certificateInfoNo": "110101198503127890"
+    },
+    "extInfo": {
+        "otherParamsByUrl": "",
+        "checkNetworkProtocolTime": "2026-02-13 14:42:45",
+        "checkNotificationTime": "2026-02-13 14:42:45",
+        "fingerprintValue": "de45334d-462d-49b1-a3ae-4a1af9d73632",
+        "overseasCallInterceptServiceStatus": 1,
+        "overseasMsgInterceptServiceStatus": 1,
+        "overseasCallInterceptServiceTime": "",
+        "overseasMsgInterceptServiceTime": ""
+    },
+    "overseasConfig": 2,
+    "validCaptcha": {
+        "id": "74b23df3e9b8428ba092a43ef57d4e64",
+        "startSlidingTime": "2026-02-13T07:20:58.217Z",
+        "endSlidingTime": "2026-02-13T07:21:59.367Z",
+        "imageCaptchaTrack": {
+            "bgImageWidth": 260,
+            "bgImageHeight": 159,
+            "sliderImageWidth": 240,
+            "sliderImageHeight": 38,
+            "trackList": [
+                {
+                    "x": 0,
+                    "y": 0,
+                    "type": "down",
+                    "t": 60718
+                },
+                {
+                    "x": 9.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60813
+                },
+                {
+                    "x": 13.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60828
+                },
+                {
+                    "x": 15.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60836
+                },
+                {
+                    "x": 17.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60843
+                },
+                {
+                    "x": 19.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60848
+                },
+                {
+                    "x": 20.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60857
+                },
+                {
+                    "x": 21.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60864
+                },
+                {
+                    "x": 22.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60872
+                },
+                {
+                    "x": 23.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60878
+                },
+                {
+                    "x": 23.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60888
+                },
+                {
+                    "x": 24.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60894
+                },
+                {
+                    "x": 25.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60904
+                },
+                {
+                    "x": 25.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60908
+                },
+                {
+                    "x": 26.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60916
+                },
+                {
+                    "x": 26.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60924
+                },
+                {
+                    "x": 26.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60932
+                },
+                {
+                    "x": 26.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60938
+                },
+                {
+                    "x": 27.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60946
+                },
+                {
+                    "x": 27.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60955
+                },
+                {
+                    "x": 27.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60968
+                },
+                {
+                    "x": 28.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60976
+                },
+                {
+                    "x": 28.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60984
+                },
+                {
+                    "x": 29.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60992
+                },
+                {
+                    "x": 30.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 60998
+                },
+                {
+                    "x": 30.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 61006
+                },
+                {
+                    "x": 31.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 61014
+                },
+                {
+                    "x": 31.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 61022
+                },
+                {
+                    "x": 31.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 61039
+                },
+                {
+                    "x": 31.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 61059
+                },
+                {
+                    "x": 32.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 61066
+                },
+                {
+                    "x": 32.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 61074
+                },
+                {
+                    "x": 32.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 61082
+                },
+                {
+                    "x": 32.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 61088
+                },
+                {
+                    "x": 33.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 61096
+                },
+                {
+                    "x": 33.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 61106
+                },
+                {
+                    "x": 33.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 61112
+                },
+                {
+                    "x": 33.33984375,
+                    "y": 0.8671875,
+                    "type": "move",
+                    "t": 61135
+                },
+                {
+                    "x": 33.33984375,
+                    "y": 0.8671875,
+                    "type": "up",
+                    "t": 61150
+                }
+            ]
+        }
+    }
+}
