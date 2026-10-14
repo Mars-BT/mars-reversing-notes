@@ -1,0 +1,18 @@
+https://www.nmpa.gov.cn/xxgk/ggtg/index_2.html
+
+# 目录
+dec.js    瑞数主文件（解密后的整份代码）
+enc.js    挑战页里的内联脚本（$_ts.nsd / $_ts.cd），每次请求由 demo.py 覆盖写入
+env.js    补环境
+demo.js   获取 cookie（node demo.js）
+demo.py   获取数据（python demo.py）
+meta.json 挑战页里那个 <meta id=... content=...> 的当次值，供 env.js 使用
+
+# 运行
+python demo.py
+
+# 说明
+瑞数6 的两个 cookie 分工不同：
+  NfBCSins2OywS —— 服务器在 412 挑战响应里直接下发（Set-Cookie）
+  NfBCSins2OywT —— 由 JS 计算，即本目录补环境的产物
+所以 demo.py 的流程是：GET 挑战页 → 提取 enc.js → node demo.js 出 T → 带 S+T 再 GET → 200 真实页面。
